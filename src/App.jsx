@@ -1,5 +1,35 @@
 import React, { useState, useEffect, useCallback } from 'react';
 
+// Helper function to parse periodName (e.g., "March 2025") into a Date object for sorting
+// This allows for consistent sorting based on the month and year.
+const parsePeriodNameToSortableDate = (periodName) => {
+  const parts = periodName.split(' ');
+  // If the format is not as expected, return a very old date to push it to the end
+  if (parts.length < 2) return new Date(0); 
+
+  const monthString = parts[0];
+  const yearString = parts[1];
+
+  // Map full and abbreviated month names to their 0-indexed month numbers
+  const monthMap = {
+    'january': 0, 'february': 1, 'march': 2, 'april': 3, 'may': 4, 'june': 5,
+    'july': 6, 'august': 7, 'september': 8, 'october': 9, 'november': 10, 'december': 11,
+    'jan': 0, 'feb': 1, 'mar': 2, 'apr': 3, 'may': 4, 'jun': 5,
+    'jul': 6, 'aug': 7, 'sep': 8, 'oct': 9, 'nov': 10, 'dec': 11,
+  };
+
+  const monthIndex = monthMap[monthString.toLowerCase()];
+  const year = parseInt(yearString);
+
+  // If month or year cannot be parsed, return a very old date
+  if (monthIndex === undefined || isNaN(year)) {
+    return new Date(0); 
+  }
+
+  // Create a Date object representing the first day of that month and year
+  return new Date(year, monthIndex, 1); 
+};
+
 // Helper function to calculate working days for a given month and year
 const calculateMonthlyWorkingDays = (month, year, extraHolidaysCount = 0) => {
   const date = new Date(year, month - 1, 1); // Month is 0-indexed in JS Date constructor
@@ -58,12 +88,19 @@ const App = () => {
       const storedRecords = localStorage.getItem('attendanceRecords');
       if (storedRecords) {
         const parsedRecords = JSON.parse(storedRecords);
-        setAttendanceRecords(parsedRecords);
+        // Sort records by periodName (latest month comes on top)
+        const sortedRecords = parsedRecords.sort((a, b) => {
+          const dateA = parsePeriodNameToSortableDate(a.periodName);
+          const dateB = parsePeriodNameToSortableDate(b.periodName);
+          // Sort in descending order (latest month first)
+          return dateB.getTime() - dateA.getTime(); 
+        });
+        setAttendanceRecords(sortedRecords);
 
-        // Automatically open the last saved record if it exists
-        if (parsedRecords.length > 0) {
-          const lastRecord = parsedRecords[0]; // Assuming records are stored in descending timestamp order
-          handleEditRecord(lastRecord); // This will set editingRecordId and populate fields
+        // Automatically open the latest saved record if it exists
+        if (sortedRecords.length > 0) {
+          const lastRecord = sortedRecords[0]; 
+          handleEditRecord(lastRecord);
         }
       }
     } catch (e) {
@@ -190,15 +227,23 @@ const App = () => {
 
     let updatedRecords;
     if (editingRecordId) {
-      // Update existing record in the array
+      // Update existing record and re-sort the entire list
       updatedRecords = attendanceRecords.map(rec =>
         rec.id === editingRecordId ? recordData : rec
-      ).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)); // Re-sort after update
+      ).sort((a, b) => {
+        const dateA = parsePeriodNameToSortableDate(a.periodName);
+        const dateB = parsePeriodNameToSortableDate(b.periodName);
+        return dateB.getTime() - dateA.getTime(); // Descending order (latest first)
+      });
       setMessage("Record updated successfully!");
       setMessageType('success');
     } else {
-      // Add new record to the array, then sort by timestamp
-      updatedRecords = [recordData, ...attendanceRecords].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+      // Add new record and re-sort the entire list
+      updatedRecords = [recordData, ...attendanceRecords].sort((a, b) => {
+        const dateA = parsePeriodNameToSortableDate(a.periodName);
+        const dateB = parsePeriodNameToSortableDate(b.periodName);
+        return dateB.getTime() - dateA.getTime(); // Descending order (latest first)
+      });
       setMessage("Record saved successfully!");
       setMessageType('success');
       // For new records, clear the form for the next entry
@@ -206,7 +251,7 @@ const App = () => {
       setDaysAttended('');
       setExtraHolidays('');
       setAttendancePercentage(null);
-      setShowAttendanceDisplayInButton(false); // Revert button for new entry
+      setShowAttendanceDisplayInButton(false); 
       // Reset period name to current month/year after saving a new record
       const today = new Date();
       const currentMonth = today.toLocaleString('default', { month: 'long' });
@@ -228,7 +273,13 @@ const App = () => {
   // Function to confirm and delete record
   const confirmDelete = () => {
     if (recordToDelete) {
-      const updatedRecords = attendanceRecords.filter(rec => rec.id !== recordToDelete.id);
+      // Filter out the deleted record and re-sort the remaining list
+      const updatedRecords = attendanceRecords.filter(rec => rec.id !== recordToDelete.id)
+        .sort((a, b) => {
+          const dateA = parsePeriodNameToSortableDate(a.periodName);
+          const dateB = parsePeriodNameToSortableDate(b.periodName);
+          return dateB.getTime() - dateA.getTime(); // Descending order (latest first)
+        });
       setAttendanceRecords(updatedRecords);
       localStorage.setItem('attendanceRecords', JSON.stringify(updatedRecords));
       setMessage("Record deleted successfully!");
@@ -338,11 +389,19 @@ const App = () => {
     if (editingRecordId) {
       updatedRecords = attendanceRecords.map(rec =>
         rec.id === editingRecordId ? tempRecordData : rec
-      ).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+      ).sort((a, b) => {
+        const dateA = parsePeriodNameToSortableDate(a.periodName);
+        const dateB = parsePeriodNameToSortableDate(b.periodName);
+        return dateB.getTime() - dateA.getTime(); // Descending order (latest first)
+      });
       setMessage("Attendance updated successfully!");
       setMessageType('success');
     } else {
-      updatedRecords = [tempRecordData, ...attendanceRecords].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+      updatedRecords = [tempRecordData, ...attendanceRecords].sort((a, b) => {
+        const dateA = parsePeriodNameToSortableDate(a.periodName);
+        const dateB = parsePeriodNameToSortableDate(b.periodName);
+        return dateB.getTime() - dateA.getTime(); // Descending order (latest first)
+      });
       setMessage("Attendance saved successfully!");
       setMessageType('success');
       // For new records, we might want to keep the current period name for subsequent +1 clicks
