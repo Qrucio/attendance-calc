@@ -1065,11 +1065,8 @@ const App = () => {
         /* Styles for the +1 button */
         .plus-one-container {
             position: relative;
-            /* Calculate height based on form-input padding and font-size */
-            /* form-input height: 0.5rem (padding-top) + 0.5rem (padding-bottom) + 1rem (font-size, default) + 1px (border-top) + 1px (border-bottom) = 2rem + 2px = 32px + 2px = 34px */
-            height: 34px; 
-            width: 34px; /* Keep it square, same as height */
-            /* Removed margin-left as it will be repositioned */
+            height: 56px; /* Match the height of the primary button */
+            width: 56px; /* Keep it square, same as height */
             flex-shrink: 0; /* Prevent it from shrinking */
         }
 
@@ -1080,7 +1077,7 @@ const App = () => {
             color: #fff;
             border: none;
             border-radius: 50%; /* Circular */
-            font-size: 1.25rem; /* Adjusted font size for more inner padding */
+            font-size: 1.5rem; /* Increased font size for better visibility */
             font-weight: 700;
             cursor: pointer;
             display: flex;
@@ -1090,6 +1087,7 @@ const App = () => {
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             position: relative; /* Changed to relative to contain internal spans */
             overflow: hidden; /* Hide overflow during animation */
+            padding: 0.75rem; /* Increased padding for bigger button */
         }
 
         .plus-one-button.flashing { /* New class for green flash */
@@ -1117,7 +1115,7 @@ const App = () => {
         .plus-one-button .plus-one-icon {
             position: absolute;
             transition: all 0.3s ease-in-out; /* Smooth transition for morphing */
-            font-size: 1.25rem; /* Consistent with button font size */
+            font-size: 1.5rem; /* Consistent with button font size */
             font-weight: 700;
             color: #fff;
         }
