@@ -1354,6 +1354,32 @@ const App = () => {
       <footer className="footer">
         Made with ❤️ by Divyansh
       </footer>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <h3 className="modal-title">Confirm Delete</h3>
+            <p className="modal-message">
+              Are you sure you want to delete the attendance record for "{recordToDelete?.periodName}"?
+            </p>
+            <div className="modal-buttons">
+              <button
+                onClick={cancelDelete}
+                className="modal-button modal-cancel-button"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDelete}
+                className="modal-button modal-delete-button"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
