@@ -1142,38 +1142,6 @@ const App = () => {
         .days-attended-input-wrapper {
             flex-grow: 1;
         }
-
-        /* New style for the target display */
-        .target-display {
-            font-size: 0.875rem; /* Same as form-label */
-            font-weight: 500; /* Same as form-label */
-            color: #d1d5db; /* Same as form-label */
-            margin-top: 0.25rem; /* Align with label's bottom margin */
-            margin-bottom: 0.25rem; /* Match input's label margin */
-            padding: 0.5rem 0.75rem; /* Match input padding for height alignment */
-            border: 1px solid #2C2C4A; /* Match input border */
-            border-radius: 0.375rem; /* Match input border-radius */
-            background-color: #25253B; /* Match input background */
-            display: flex; /* Use flex to center content vertically */
-            align-items: center; /* Center content vertically */
-            box-sizing: border-box; /* Include padding and border in the element's total width and height */
-            height: 34px; /* Explicitly set height to match input for perfect alignment */
-            color: #c084fc; /* A distinct but harmonious color for the target value */
-            justify-content: center; /* Center the text horizontally */
-        }
-        .target-label {
-            color: #9ca3af; /* Slightly muted color for the "Target:" label */
-            margin-right: 0.25rem; /* Small space between label and number */
-        }
-        .days-attended-row { /* New class for the row containing days attended and target */
-            display: flex;
-            align-items: flex-end; /* Align items to the bottom of their container */
-            gap: 0.5rem;
-            margin-bottom: 1rem;
-        }
-        .days-attended-input-wrapper {
-            flex-grow: 1;
-        }
         `}
       </style>
 
@@ -1261,27 +1229,21 @@ const App = () => {
           </div>
         </div>
 
-        <div className="form-group days-attended-row">
-          <div className="days-attended-input-wrapper">
-            <label htmlFor="daysAttended" className="form-label">Days Attended</label>
-            <input
-              type="number"
-              id="daysAttended"
-              className="form-input"
-              value={daysAttended}
-              onChange={(e) => {
-                setDaysAttended(e.target.value);
-                setShowAttendanceDisplayInButton(false);
-                setAttendancePercentage(null);
-              }}
-              placeholder="e.g., 18"
-              min="0"
-            />
-          </div>
-          <div className="target-display">
-            <span className="target-label">Target:</span>
-            <span>{Math.round(totalWorkingDays * 0.75)}</span>
-          </div>
+        <div className="form-group">
+          <label htmlFor="daysAttended" className="form-label">Days Attended</label>
+          <input
+            type="number"
+            id="daysAttended"
+            className="form-input"
+            value={daysAttended}
+            onChange={(e) => {
+              setDaysAttended(e.target.value);
+              setShowAttendanceDisplayInButton(false);
+              setAttendancePercentage(null);
+            }}
+            placeholder={`e.g., 18${totalWorkingDays > 0 ? ` (Target: ${Math.round(totalWorkingDays * 0.75)})` : ''}`}
+            min="0"
+          />
         </div>
 
         {/* New button group for edit mode actions */}
